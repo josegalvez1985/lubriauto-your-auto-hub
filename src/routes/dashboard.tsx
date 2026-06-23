@@ -6,7 +6,10 @@ import {
   Droplet, Wrench, Gauge, Bell, Car, Plus, Filter, ClipboardList,
   CalendarClock, ChevronRight, Settings, LogOut, Home as HomeIcon, History,
 } from "lucide-react";
-import logoAsset from "@/assets/lubriauto-logo.asset.json";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { useAuth } from "@/lib/auth";
+
+const logoUrl = `${import.meta.env.BASE_URL}icon-512.png`;
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -19,6 +22,7 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 function Dashboard() {
+  const { session, logout } = useAuth();
   return (
     <div className="min-h-screen bg-background pb-24 lg:pb-0">
       {/* Top hero header */}
@@ -30,18 +34,21 @@ function Dashboard() {
              style={{ background: "var(--brand-orange)" }} />
         <div className="relative z-10 max-w-6xl mx-auto">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <img src={logoAsset.url} alt="LubriAuto" className="h-11 w-11 rounded-xl bg-white/10 p-1.5 ring-1 ring-white/15" />
+            <Link to="/profile" className="flex items-center gap-3 rounded-2xl hover:bg-white/5 transition px-1 py-1 -mx-1">
+              <div className="h-14 w-14 shrink-0 rounded-2xl bg-white/10 backdrop-blur p-2 ring-1 ring-white/15 flex items-center justify-center">
+                <img src={logoUrl} alt="LubriAuto" className="h-full w-full object-contain rounded-xl" />
+              </div>
               <div>
                 <p className="text-xs text-white/60">Hola de nuevo,</p>
-                <p className="font-semibold">Carlos Rodríguez</p>
+                <p className="font-semibold">{session?.nombre ?? "Bienvenido"}</p>
               </div>
-            </div>
+            </Link>
             <div className="flex items-center gap-2">
+              <ThemeToggle className="text-white hover:bg-white/10 rounded-full" />
               <Button size="icon" variant="ghost" className="text-white hover:bg-white/10 rounded-full">
                 <Bell className="h-5 w-5" />
               </Button>
-              <Link to="/">
+              <Link to="/" onClick={() => logout()}>
                 <Button size="icon" variant="ghost" className="text-white hover:bg-white/10 rounded-full">
                   <LogOut className="h-5 w-5" />
                 </Button>
@@ -180,14 +187,10 @@ function Dashboard() {
             { icon: History, label: "Historial" },
             { icon: Plus, label: "Nuevo", primary: true },
             { icon: Bell, label: "Avisos" },
-            { icon: Settings, label: "Ajustes" },
-          ].map((it) => (
-            <li key={it.label}>
-              <button
-                className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl text-[10px] font-medium transition ${
-                  it.active ? "text-foreground" : "text-muted-foreground"
-                }`}
-              >
+            { icon: Settings, label: "Ajustes", to: "/profile" as const },
+          ].map((it) => {
+            const inner = (
+              <>
                 {it.primary ? (
                   <span className="h-11 w-11 -mt-6 rounded-full flex items-center justify-center text-white shadow-lg"
                         style={{ background: "var(--gradient-accent)", boxShadow: "var(--shadow-accent)" }}>
@@ -197,9 +200,21 @@ function Dashboard() {
                   <it.icon className="h-5 w-5" />
                 )}
                 <span>{it.label}</span>
-              </button>
-            </li>
-          ))}
+              </>
+            );
+            const cls = `flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl text-[10px] font-medium transition ${
+              it.active ? "text-foreground" : "text-muted-foreground"
+            }`;
+            return (
+              <li key={it.label}>
+                {it.to ? (
+                  <Link to={it.to} className={cls}>{inner}</Link>
+                ) : (
+                  <button className={cls}>{inner}</button>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </nav>
     </div>

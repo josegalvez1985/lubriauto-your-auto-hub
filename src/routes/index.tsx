@@ -1,13 +1,20 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { toast } from "sonner";
+import { useAuth } from "@/lib/auth";
+import { mensajeLimpio } from "@/lib/auth-api";
+import { ResetPasswordDialog } from "@/components/reset-password-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card } from "@/components/ui/card";
 import { Droplet, Wrench, Gauge, ShieldCheck, Eye, EyeOff, Mail, Lock } from "lucide-react";
-import logoAsset from "@/assets/lubriauto-logo.asset.json";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { InstallPwaButton } from "@/components/install-pwa-button";
+
+const logoUrl = `${import.meta.env.BASE_URL}icon-512.png`;
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -23,6 +30,24 @@ export const Route = createFileRoute("/")({
 
 function LoginPage() {
   const [showPwd, setShowPwd] = useState(false);
+  const [usuario, setUsuario] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [resetOpen, setResetOpen] = useState(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    const r = await login(usuario.trim(), password);
+    setLoading(false);
+    if (r.ok) {
+      navigate({ to: "/dashboard" });
+    } else {
+      toast.error(mensajeLimpio(r.error));
+    }
+  };
 
   return (
     <div className="min-h-screen w-full grid lg:grid-cols-2 bg-background">
@@ -38,8 +63,8 @@ function LoginPage() {
              style={{ background: "white" }} />
 
         <div className="relative z-10 flex items-center gap-3">
-          <div className="h-12 w-12 rounded-xl bg-white/10 backdrop-blur flex items-center justify-center ring-1 ring-white/15">
-            <img src={logoAsset.url} alt="LubriAuto" className="h-10 w-10 object-contain" />
+          <div className="h-16 w-16 shrink-0 rounded-2xl bg-white/10 backdrop-blur p-2 flex items-center justify-center ring-1 ring-white/15">
+            <img src={logoUrl} alt="LubriAuto" className="h-full w-full object-contain rounded-xl" />
           </div>
           <div>
             <p className="font-extrabold tracking-tight text-xl leading-none">
@@ -80,11 +105,14 @@ function LoginPage() {
       </aside>
 
       {/* Form side */}
-      <main className="flex items-center justify-center px-5 py-10 sm:px-8">
+      <main className="relative flex items-center justify-center px-5 py-10 sm:px-8">
+        <ThemeToggle className="absolute top-4 right-4 z-20 text-muted-foreground hover:text-foreground" />
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="lg:hidden flex flex-col items-center mb-8">
-            <img src={logoAsset.url} alt="LubriAuto" className="h-24 w-24 object-contain drop-shadow" />
+            <div className="h-32 w-32 shrink-0 rounded-3xl bg-white dark:bg-white/10 dark:backdrop-blur p-4 flex items-center justify-center ring-1 ring-[color-mix(in_oklab,var(--brand-navy)_12%,transparent)] dark:ring-white/15 shadow-[var(--shadow-card)]">
+              <img src={logoUrl} alt="LubriAuto" className="h-full w-full object-contain rounded-2xl" />
+            </div>
             <p className="mt-3 text-xs uppercase tracking-[0.2em] text-muted-foreground">
               Mantenimiento vehicular
             </p>
@@ -100,22 +128,18 @@ function LoginPage() {
               </p>
             </div>
 
-            <form
-              className="space-y-5"
-              onSubmit={(e) => {
-                e.preventDefault();
-                // Demo: navega al dashboard
-                window.location.href = "/dashboard";
-              }}
-            >
+            <form className="space-y-5" onSubmit={handleSubmit}>
               <div className="space-y-2">
-                <Label htmlFor="email">Correo electrónico</Label>
+                <Label htmlFor="usuario">Correo o usuario</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    id="email"
-                    type="email"
+                    id="usuario"
+                    type="text"
                     required
+                    autoComplete="username"
+                    value={usuario}
+                    onChange={(e) => setUsuario(e.target.value)}
                     placeholder="tu@correo.com"
                     className="pl-10 h-12 rounded-xl"
                   />
@@ -125,9 +149,14 @@ function LoginPage() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">Contraseña</Label>
-                  <a href="#" className="text-xs font-medium hover:underline" style={{ color: "var(--brand-orange)" }}>
+                  <button
+                    type="button"
+                    onClick={() => setResetOpen(true)}
+                    className="text-xs font-medium hover:underline"
+                    style={{ color: "var(--brand-orange)" }}
+                  >
                     ¿La olvidaste?
-                  </a>
+                  </button>
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -135,6 +164,9 @@ function LoginPage() {
                     id="password"
                     type={showPwd ? "text" : "password"}
                     required
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
                     className="pl-10 pr-10 h-12 rounded-xl"
                   />
@@ -158,10 +190,11 @@ function LoginPage() {
 
               <Button
                 type="submit"
-                className="w-full h-12 rounded-xl text-base font-semibold text-white border-0 hover:opacity-95 transition"
+                disabled={loading}
+                className="w-full h-12 rounded-xl text-base font-semibold text-white border-0 hover:opacity-95 transition disabled:opacity-60"
                 style={{ background: "var(--gradient-accent)", boxShadow: "var(--shadow-accent)" }}
               >
-                Iniciar sesión
+                {loading ? "Ingresando…" : "Iniciar sesión"}
               </Button>
 
               <div className="relative py-2">
@@ -185,17 +218,21 @@ function LoginPage() {
                   Apple
                 </Button>
               </div>
+
+              <InstallPwaButton className="w-full h-11 rounded-xl" />
             </form>
 
             <p className="mt-8 text-center text-sm text-muted-foreground">
               ¿Aún no tienes cuenta?{" "}
-              <Link to="/" className="font-semibold hover:underline" style={{ color: "var(--brand-navy)" }}>
+              <Link to="/registro" className="font-semibold hover:underline" style={{ color: "var(--brand-navy)" }}>
                 Regístrate gratis
               </Link>
             </p>
           </Card>
         </div>
       </main>
+
+      <ResetPasswordDialog open={resetOpen} onOpenChange={setResetOpen} />
     </div>
   );
 }

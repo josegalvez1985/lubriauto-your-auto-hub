@@ -6,10 +6,20 @@
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
+const base = process.env.GITHUB_PAGES ? "/lubriauto-your-auto-hub/" : "/";
+
 export default defineConfig({
+  // GitHub Pages no tiene servidor: build estatico SPA (sin nitro/Cloudflare).
+  nitro: false,
+  vite: {
+    base,
+  },
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
     server: { entry: "server" },
+    // SPA mode: prerender un shell index.html y deja que el cliente hidrate las rutas.
+    spa: { enabled: true },
+    prerender: { enabled: true, crawlLinks: false },
   },
 });
