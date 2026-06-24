@@ -10,6 +10,8 @@ import { useTheme } from "@/hooks/use-theme";
 import { InstallPwaButton } from "@/components/install-pwa-button";
 import { useAuth } from "@/lib/auth";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
+import { biometricEnabled, biometricAvailable, biometricEnroll, biometricDisable } from "@/lib/biometric";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -20,8 +22,6 @@ export const Route = createFileRoute("/profile")({
   }),
   component: ProfilePage,
 });
-
-const BIOMETRIC_KEY = "biometric-enabled";
 
 function ProfilePage() {
   const { theme, toggle } = useTheme();
@@ -38,28 +38,28 @@ function ProfilePage() {
   };
 
   useEffect(() => {
-    setBiometric(localStorage.getItem(BIOMETRIC_KEY) === "true");
-    setBiometricSupported(
-      typeof window !== "undefined" &&
-      "PublicKeyCredential" in window
-    );
+    setBiometric(biometricEnabled());
+    biometricAvailable().then(setBiometricSupported);
   }, []);
 
   const toggleBiometric = async (next: boolean) => {
-    if (next && biometricSupported) {
-      try {
-        const available =
-          await (window as any).PublicKeyCredential?.isUserVerifyingPlatformAuthenticatorAvailable?.();
-        if (!available) {
-          alert("Este dispositivo no tiene un autenticador biométrico disponible.");
-          return;
-        }
-      } catch {
-        // continúa de todos modos
-      }
+    if (!next) {
+      biometricDisable();
+      setBiometric(false);
+      return;
     }
-    setBiometric(next);
-    localStorage.setItem(BIOMETRIC_KEY, String(next));
+    if (!biometricSupported) {
+      toast.error("Este dispositivo no tiene un autenticador biométrico disponible.");
+      return;
+    }
+    try {
+      await biometricEnroll(session?.nombre ?? session?.username ?? "usuario");
+      setBiometric(true);
+      toast.success("Acceso biométrico activado.");
+    } catch {
+      setBiometric(false);
+      toast.error("No se pudo activar el acceso biométrico.");
+    }
   };
 
   return (

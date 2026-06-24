@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { User, Mail, Lock, AtSign, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { User, Mail, Lock, Phone, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { authApi, mensajeLimpio } from "@/lib/auth-api";
 import { useAuth } from "@/lib/auth";
@@ -24,8 +24,8 @@ export const Route = createFileRoute("/registro")({
 
 function RegistroPage() {
   const [nombre, setNombre] = useState("");
-  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
+  const [telefono, setTelefono] = useState("");
   const [password, setPassword] = useState("");
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -39,14 +39,15 @@ function RegistroPage() {
       return;
     }
     setLoading(true);
-    const r = await authApi.registrar(username.trim(), email.trim(), nombre.trim(), password);
+    const correo = email.trim();
+    const r = await authApi.registrar(correo, correo, nombre.trim(), password, telefono.trim());
     if (!r.ok) {
       setLoading(false);
       toast.error(mensajeLimpio(r.error));
       return;
     }
     // Auto-login tras registro
-    const l = await login(username.trim(), password);
+    const l = await login(correo, password);
     setLoading(false);
     if (l.ok) {
       navigate({ to: "/dashboard" });
@@ -61,7 +62,7 @@ function RegistroPage() {
       <ThemeToggle className="absolute top-4 right-4 z-20 text-muted-foreground hover:text-foreground" />
       <div className="w-full max-w-md">
         <div className="flex flex-col items-center mb-8">
-          <div className="h-24 w-24 shrink-0 rounded-3xl bg-white dark:bg-white/10 p-3 flex items-center justify-center ring-1 ring-[color-mix(in_oklab,var(--brand-navy)_12%,transparent)] dark:ring-white/15 shadow-[var(--shadow-card)]">
+          <div className="h-28 w-28 shrink-0 rounded-3xl bg-white dark:bg-white/10 p-1 flex items-center justify-center ring-1 ring-[color-mix(in_oklab,var(--brand-navy)_12%,transparent)] dark:ring-white/15 shadow-[var(--shadow-card)]">
             <img src={logoUrl} alt="LubriAuto" className="h-full w-full object-contain rounded-2xl" />
           </div>
         </div>
@@ -78,15 +79,15 @@ function RegistroPage() {
                      placeholder="Jose Galvez" className="pl-10 h-12 rounded-xl" />
             </Field>
 
-            <Field id="username" label="Nombre de usuario" icon={AtSign}>
-              <Input id="username" required autoComplete="username" value={username}
-                     onChange={(e) => setUsername(e.target.value)}
-                     placeholder="jgalvez" className="pl-10 h-12 rounded-xl" />
-            </Field>
-
             <Field id="email" label="Correo electrónico" icon={Mail}>
               <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
                      placeholder="tu@correo.com" className="pl-10 h-12 rounded-xl" />
+            </Field>
+
+            <Field id="telefono" label="Teléfono (opcional)" icon={Phone}>
+              <Input id="telefono" type="tel" autoComplete="tel" value={telefono}
+                     onChange={(e) => setTelefono(e.target.value)}
+                     placeholder="0991234567" className="pl-10 h-12 rounded-xl" />
             </Field>
 
             <Field id="password" label="Contraseña" icon={Lock}>

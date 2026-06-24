@@ -12,7 +12,7 @@ type Session = {
 type AuthContextValue = {
   session: Session | null;
   isAuthenticated: boolean;
-  login: (usuario: string, password: string) => Promise<{ ok: boolean; error?: string }>;
+  login: (usuario: string, password: string, recordar?: boolean) => Promise<{ ok: boolean; error?: string }>;
   logout: () => void;
 };
 
@@ -23,11 +23,12 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 function loadSession(): Session | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY) ?? sessionStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const s = JSON.parse(raw) as Session;
     if (!tokenValido(s.expira)) {
       localStorage.removeItem(STORAGE_KEY);
+      sessionStorage.removeItem(STORAGE_KEY);
       return null;
     }
     return s;
@@ -43,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(loadSession());
   }, []);
 
-  const login: AuthContextValue["login"] = async (usuario, password) => {
+  const login: AuthContextValue["login"] = async (usuario, password, recordar = true) => {
     const r = await authApi.login(usuario, password);
     if (r.ok && r.token && r.expira) {
       const s: Session = {
@@ -51,9 +52,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         expira: r.expira,
         id_usuario: r.id_usuario ?? 0,
         nombre: r.nombre ?? usuario,
-        username: usuario,
+        username: r.username ?? usuario,
       };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+      const store = recordar ? localStorage : sessionStorage;
+      const otro = recordar ? sessionStorage : localStorage;
+      otro.removeItem(STORAGE_KEY);
+      store.setItem(STORAGE_KEY, JSON.stringify(s));
       setSession(s);
       return { ok: true };
     }
@@ -62,6 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     localStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem(STORAGE_KEY);
     setSession(null);
   };
 

@@ -5,9 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import {
   Droplet, Wrench, Gauge, Bell, Car, Plus, Filter, ClipboardList,
   CalendarClock, ChevronRight, Settings, LogOut, Home as HomeIcon, History,
+  ClipboardList as ServiceIcon,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/lib/auth";
+import { InstallPwaBanner } from "@/components/install-pwa-banner";
 
 const logoUrl = `${import.meta.env.BASE_URL}icon-512.png`;
 
@@ -24,7 +26,7 @@ export const Route = createFileRoute("/dashboard")({
 function Dashboard() {
   const { session, logout } = useAuth();
   return (
-    <div className="min-h-screen bg-background pb-24 lg:pb-0">
+    <div className="min-h-screen bg-background pb-28 lg:pb-0 overflow-x-hidden">
       {/* Top hero header */}
       <header
         className="text-white px-5 sm:px-8 pt-8 pb-24 rounded-b-[2rem] relative overflow-hidden"
@@ -33,7 +35,7 @@ function Dashboard() {
         <div className="absolute -top-20 -right-10 w-72 h-72 rounded-full blur-3xl opacity-20"
              style={{ background: "var(--brand-orange)" }} />
         <div className="relative z-10 max-w-6xl mx-auto">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <Link to="/profile" className="flex items-center gap-3 rounded-2xl hover:bg-white/5 transition px-1 py-1 -mx-1">
               <div className="h-14 w-14 shrink-0 rounded-2xl bg-white/10 backdrop-blur p-2 ring-1 ring-white/15 flex items-center justify-center">
                 <img src={logoUrl} alt="LubriAuto" className="h-full w-full object-contain rounded-xl" />
@@ -43,11 +45,37 @@ function Dashboard() {
                 <p className="font-semibold">{session?.nombre ?? "Bienvenido"}</p>
               </div>
             </Link>
+
+            {/* Nav desktop (topbar) */}
+            <nav className="hidden lg:flex items-center gap-1">
+              {[
+                { icon: HomeIcon, label: "Inicio", active: true },
+                { icon: History, label: "Historial" },
+                { icon: ServiceIcon, label: "Servicios" },
+                { icon: Bell, label: "Avisos" },
+              ].map(({ icon: Icon, label, active }) => (
+                <button
+                  key={label}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition ${
+                    active ? "bg-white/15 text-white" : "text-white/70 hover:bg-white/10 hover:text-white"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {label}
+                </button>
+              ))}
+            </nav>
+
             <div className="flex items-center gap-2">
               <ThemeToggle className="text-white hover:bg-white/10 rounded-full" />
-              <Button size="icon" variant="ghost" className="text-white hover:bg-white/10 rounded-full">
+              <Button size="icon" variant="ghost" className="text-white hover:bg-white/10 rounded-full lg:hidden">
                 <Bell className="h-5 w-5" />
               </Button>
+              <Link to="/profile" className="hidden lg:block">
+                <Button size="icon" variant="ghost" className="text-white hover:bg-white/10 rounded-full">
+                  <Settings className="h-5 w-5" />
+                </Button>
+              </Link>
               <Link to="/" onClick={() => logout()}>
                 <Button size="icon" variant="ghost" className="text-white hover:bg-white/10 rounded-full">
                   <LogOut className="h-5 w-5" />
@@ -67,7 +95,7 @@ function Dashboard() {
                 </div>
                 <Car className="h-10 w-10 text-white/40" />
               </div>
-              <div className="grid grid-cols-3 gap-4 mt-6">
+              <div className="grid grid-cols-3 gap-2 sm:gap-4 mt-6">
                 <Stat label="Kilometraje" value="48.250 km" />
                 <Stat label="Último servicio" value="hace 28 días" />
                 <Stat label="Estado" value="Óptimo" accent />
@@ -180,8 +208,8 @@ function Dashboard() {
       </main>
 
       {/* Mobile bottom nav */}
-      <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-card/95 backdrop-blur border-t border-border px-4 py-2 z-30">
-        <ul className="flex items-center justify-around">
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-card/95 backdrop-blur border-t border-border px-2 pt-3 pb-[max(0.5rem,env(safe-area-inset-bottom))] z-30">
+        <ul className="flex items-end justify-around">
           {[
             { icon: HomeIcon, label: "Inicio", active: true },
             { icon: History, label: "Historial" },
@@ -192,14 +220,14 @@ function Dashboard() {
             const inner = (
               <>
                 {it.primary ? (
-                  <span className="h-11 w-11 -mt-6 rounded-full flex items-center justify-center text-white shadow-lg"
+                  <span className="h-12 w-12 -mt-7 rounded-full flex items-center justify-center text-white shadow-lg ring-4 ring-card"
                         style={{ background: "var(--gradient-accent)", boxShadow: "var(--shadow-accent)" }}>
                     <it.icon className="h-5 w-5" />
                   </span>
                 ) : (
                   <it.icon className="h-5 w-5" />
                 )}
-                <span>{it.label}</span>
+                <span className="leading-none">{it.label}</span>
               </>
             );
             const cls = `flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl text-[10px] font-medium transition ${
@@ -217,15 +245,17 @@ function Dashboard() {
           })}
         </ul>
       </nav>
+
+      <InstallPwaBanner liftOnMobile />
     </div>
   );
 }
 
 function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
-    <div>
-      <p className="text-[11px] uppercase tracking-wider text-white/50">{label}</p>
-      <p className={`mt-1 font-bold ${accent ? "" : "text-white"}`}
+    <div className="min-w-0">
+      <p className="text-[10px] sm:text-[11px] uppercase tracking-wider text-white/50 truncate">{label}</p>
+      <p className={`mt-1 text-sm sm:text-base font-bold ${accent ? "" : "text-white"}`}
          style={accent ? { color: "var(--brand-orange)" } : undefined}>
         {value}
       </p>

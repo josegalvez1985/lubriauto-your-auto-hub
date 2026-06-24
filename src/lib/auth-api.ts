@@ -8,6 +8,7 @@ export type AuthResult = {
   expira?: string;
   id_usuario?: number;
   nombre?: string;
+  username?: string;
 };
 
 async function request(path: string, method: string, body?: unknown): Promise<AuthResult> {
@@ -36,8 +37,8 @@ async function request(path: string, method: string, body?: unknown): Promise<Au
 }
 
 export const authApi = {
-  registrar: (username: string, email: string, nombre: string, password: string) =>
-    request("registro", "POST", { username, email, nombre, password }),
+  registrar: (username: string, email: string, nombre: string, password: string, telefono?: string) =>
+    request("registro", "POST", { username, email, nombre, password, telefono }),
 
   login: (usuario: string, password: string) =>
     request("login", "POST", { usuario, password }),
