@@ -1,4 +1,4 @@
-const BASE_URL = "https://oracleapex.com/ords/josegalvez/autenticacion";
+const BASE_URL = "https://oracleapex.com/ords/josegalvez/lt/autenticacion";
 
 export type AuthResult = {
   ok: boolean;

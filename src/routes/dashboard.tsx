@@ -50,20 +50,21 @@ function Dashboard() {
             <nav className="hidden lg:flex items-center gap-1">
               {[
                 { icon: HomeIcon, label: "Inicio", active: true },
+                { icon: Car, label: "Autos", to: "/autos" as const },
                 { icon: History, label: "Historial" },
                 { icon: ServiceIcon, label: "Servicios" },
                 { icon: Bell, label: "Avisos" },
-              ].map(({ icon: Icon, label, active }) => (
-                <button
-                  key={label}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition ${
-                    active ? "bg-white/15 text-white" : "text-white/70 hover:bg-white/10 hover:text-white"
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                  {label}
-                </button>
-              ))}
+              ].map(({ icon: Icon, label, active, to }) => {
+                const cls = `flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition ${
+                  active ? "bg-white/15 text-white" : "text-white/70 hover:bg-white/10 hover:text-white"
+                }`;
+                const inner = (<><Icon className="h-4 w-4" />{label}</>);
+                return to ? (
+                  <Link key={label} to={to} className={cls}>{inner}</Link>
+                ) : (
+                  <button key={label} className={cls}>{inner}</button>
+                );
+              })}
             </nav>
 
             <div className="flex items-center gap-2">
@@ -120,27 +121,32 @@ function Dashboard() {
         {/* Quick actions */}
         <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[
+            { icon: Car, label: "Mis autos", to: "/autos" as const, cta: "Gestionar" },
             { icon: Droplet, label: "Cambio de aceite" },
             { icon: Filter, label: "Cambio de filtros" },
             { icon: Wrench, label: "Repuestos" },
-            { icon: ClipboardList, label: "Nuevo servicio" },
-          ].map(({ icon: Icon, label }) => (
-            <button
-              key={label}
-              className="group flex flex-col items-start gap-3 p-4 rounded-2xl bg-card border border-border hover:border-transparent hover:shadow-[var(--shadow-card)] transition text-left"
-            >
-              <span className="h-11 w-11 rounded-xl flex items-center justify-center text-white"
-                    style={{ background: "var(--gradient-brand)" }}>
-                <Icon className="h-5 w-5" />
-              </span>
-              <div>
-                <p className="font-semibold text-sm text-foreground">{label}</p>
-                <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                  Registrar <ChevronRight className="h-3 w-3" />
-                </p>
-              </div>
-            </button>
-          ))}
+          ].map(({ icon: Icon, label, to, cta }) => {
+            const inner = (
+              <>
+                <span className="h-11 w-11 rounded-xl flex items-center justify-center text-white"
+                      style={{ background: "var(--gradient-brand)" }}>
+                  <Icon className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="font-semibold text-sm text-foreground">{label}</p>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                    {cta ?? "Registrar"} <ChevronRight className="h-3 w-3" />
+                  </p>
+                </div>
+              </>
+            );
+            const cls = "group flex flex-col items-start gap-3 p-4 rounded-2xl bg-card border border-border hover:border-transparent hover:shadow-[var(--shadow-card)] transition text-left";
+            return to ? (
+              <Link key={label} to={to} className={cls}>{inner}</Link>
+            ) : (
+              <button key={label} className={cls}>{inner}</button>
+            );
+          })}
         </section>
 
         {/* History + reminders */}
@@ -212,8 +218,8 @@ function Dashboard() {
         <ul className="flex items-end justify-around">
           {[
             { icon: HomeIcon, label: "Inicio", active: true },
-            { icon: History, label: "Historial" },
-            { icon: Plus, label: "Nuevo", primary: true },
+            { icon: Car, label: "Autos", to: "/autos" as const },
+            { icon: Plus, label: "Nuevo", primary: true, to: "/autos" as const },
             { icon: Bell, label: "Avisos" },
             { icon: Settings, label: "Ajustes", to: "/profile" as const },
           ].map((it) => {
