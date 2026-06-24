@@ -4,10 +4,17 @@
 //     componentTagger (dev-only), VITE_* env injection, @ path alias, React/TanStack dedupe,
 //     error logger plugins, and sandbox detection (port/host/strictPort).
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
+import { existsSync } from "node:fs";
+
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 // Con dominio propio (lubrimec.shop via CNAME) el sitio se sirve desde la raíz.
-const base = "/";
+// Sin dominio (URL github.io con subpath) hay que usar el nombre del repo como base.
+// CUSTOM_DOMAIN=1 fuerza la raíz; si no, detectamos el CNAME publicado.
+const hasCustomDomain =
+  process.env.CUSTOM_DOMAIN === "1" || existsSync("public/CNAME");
+const base =
+  process.env.GITHUB_PAGES && !hasCustomDomain ? "/lubriauto-your-auto-hub/" : "/";
 
 export default defineConfig({
   // GitHub Pages no tiene servidor: build estatico SPA (sin nitro/Cloudflare).
