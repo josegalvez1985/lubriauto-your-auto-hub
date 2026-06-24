@@ -59,3 +59,11 @@ export function tokenValido(expira?: string | null): boolean {
   if (!expira) return false;
   return new Date(expira) > new Date();
 }
+
+export const SESION_INVALIDA_EVENT = "auth:sesion-invalida";
+
+export function sesionInvalida() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event(SESION_INVALIDA_EVENT));
+  }
+}

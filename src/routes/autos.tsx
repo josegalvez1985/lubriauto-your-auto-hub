@@ -44,8 +44,12 @@ function AutosPage() {
     setLoading(true);
     const r = await autosApi.lista(token);
     setLoading(false);
-    if (r.ok) setAutos(r.autos ?? []);
-    else toast.error(mensajeLimpio(r.error));
+    if (r.ok) {
+      const list = [...(r.autos ?? [])].sort(
+        (a, b) => (a.estado === "N" ? 1 : 0) - (b.estado === "N" ? 1 : 0),
+      );
+      setAutos(list);
+    } else toast.error(mensajeLimpio(r.error));
   }, [token]);
 
   useEffect(() => {
@@ -66,7 +70,7 @@ function AutosPage() {
     if (!toDelete) return;
     const r = await autosApi.eliminar(token, toDelete.id_auto);
     if (r.ok) {
-      toast.success(r.mensaje ?? "Auto eliminado");
+      toast.success("Auto inactivado");
       setToDelete(null);
       cargar();
     } else {
@@ -140,9 +144,20 @@ function AutosPage() {
                     <Car className="h-6 w-6" />
                   </span>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold truncate">{a.descripcion}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold truncate">{a.descripcion}</p>
+                      {a.estado != null && (
+                        <span className={`shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                          a.estado === "S"
+                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
+                            : "bg-muted text-muted-foreground"
+                        }`}>
+                          {a.estado === "S" ? "Activo" : "Inactivo"}
+                        </span>
+                      )}
+                    </div>
                     <p className="text-sm text-muted-foreground">
-                      Placa {a.placa} · <Gauge className="inline h-3.5 w-3.5 -mt-0.5" /> {a.km_actual.toLocaleString()} km
+                      Placa {a.placa} · <Gauge className="inline h-3.5 w-3.5 -mt-0.5" /> {a.km_actual.toLocaleString("es")} km
                     </p>
                   </div>
                   <div className="flex items-center gap-1">
@@ -172,16 +187,16 @@ function AutosPage() {
       <AlertDialog open={!!toDelete} onOpenChange={(o) => !o && setToDelete(null)}>
         <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar este auto?</AlertDialogTitle>
+            <AlertDialogTitle>¿Inactivar este auto?</AlertDialogTitle>
             <AlertDialogDescription>
-              {toDelete?.descripcion} (placa {toDelete?.placa}) se eliminará de tu cuenta.
+              {toDelete?.descripcion} (placa {toDelete?.placa}) se marcará como inactivo.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handleEliminar}
                                className="rounded-xl bg-destructive text-white hover:bg-destructive/90">
-              Eliminar
+              Inactivar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

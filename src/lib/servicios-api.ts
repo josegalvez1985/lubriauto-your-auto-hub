@@ -1,34 +1,43 @@
 import { sesionInvalida } from "@/lib/auth-api";
 
-const BASE_URL = "https://oracleapex.com/ords/josegalvez/lt/autos";
+const BASE_URL = "https://oracleapex.com/ords/josegalvez/lt/servicios";
 
-function esTokenInvalido(error?: string): boolean {
-  if (!error) return false;
-  return error.includes("ORA-20401") || /token (inv|no )/i.test(error);
-}
+export type Servicio = {
+  id_servicio: number;
+  descripcion: string;
+  km: number;
+  costo: number;
+  fecha: string;
+};
 
-export type Auto = {
+export type ServicioDetalle = Servicio & {
+  id_auto: number;
+  auto: string;
+  placa: string;
+};
+
+export type ServicioInput = {
   id_auto: number;
   descripcion: string;
-  placa: string;
-  km_actual: number;
-  estado?: string;
-  fecha_registro?: string;
+  km: number;
+  costo: number;
+  fecha?: string;
 };
 
-export type AutoInput = {
-  descripcion: string;
-  placa: string;
-  km: number;
-};
+export type ServicioUpdate = Omit<ServicioInput, "id_auto">;
 
 type ApiResult<T = unknown> = {
   ok: boolean;
   error?: string;
   mensaje?: string;
-  autos?: Auto[];
-  id_auto?: number;
+  servicios?: Servicio[];
+  id_servicio?: number;
 } & T;
+
+function esTokenInvalido(error?: string): boolean {
+  if (!error) return false;
+  return error.includes("ORA-20401") || /token (inv|no )/i.test(error);
+}
 
 async function request<T = unknown>(
   token: string,
@@ -69,11 +78,11 @@ async function request<T = unknown>(
   return data;
 }
 
-export const autosApi = {
-  lista: (token: string) => request(token, "lista", "GET"),
-  obtener: (token: string, id: number) => request(token, String(id), "GET"),
-  crear: (token: string, auto: AutoInput) => request(token, "crear", "POST", auto),
-  actualizar: (token: string, id: number, auto: AutoInput) =>
-    request(token, String(id), "PUT", auto),
+export const serviciosApi = {
+  porAuto: (token: string, idAuto: number) => request(token, `auto/${idAuto}`, "GET"),
+  obtener: (token: string, id: number) => request<Partial<ServicioDetalle>>(token, String(id), "GET"),
+  crear: (token: string, servicio: ServicioInput) => request(token, "crear", "POST", servicio),
+  actualizar: (token: string, id: number, servicio: ServicioUpdate) =>
+    request(token, String(id), "PUT", servicio),
   eliminar: (token: string, id: number) => request(token, String(id), "DELETE"),
 };

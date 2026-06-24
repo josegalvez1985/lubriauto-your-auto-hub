@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { autosApi, type Auto } from "@/lib/autos-api";
 import { mensajeLimpio } from "@/lib/auth-api";
+import { formatMiles, parseMiles } from "@/lib/formato";
 
 export function AutoFormDialog({
   open, onOpenChange, token, auto, onSaved,
@@ -28,7 +29,7 @@ export function AutoFormDialog({
     if (open) {
       setDescripcion(auto?.descripcion ?? "");
       setPlaca(auto?.placa ?? "");
-      setKm(auto ? String(auto.km_actual) : "");
+      setKm(auto ? formatMiles(String(auto.km_actual)) : "");
     }
   }, [open, auto]);
 
@@ -38,7 +39,7 @@ export function AutoFormDialog({
     const payload = {
       descripcion: descripcion.trim(),
       placa: placa.trim(),
-      km: Number(km) || 0,
+      km: parseMiles(km),
     };
     const r = editando
       ? await autosApi.actualizar(token, auto!.id_auto, payload)
@@ -75,10 +76,9 @@ export function AutoFormDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="auto-placa">Placa</Label>
+            <Label htmlFor="auto-placa">Placa <span className="text-muted-foreground font-normal">(opcional)</span></Label>
             <Input
               id="auto-placa"
-              required
               value={placa}
               onChange={(e) => setPlaca(e.target.value)}
               placeholder="ABC123"
@@ -89,12 +89,12 @@ export function AutoFormDialog({
             <Label htmlFor="auto-km">Kilometraje</Label>
             <Input
               id="auto-km"
-              type="number"
-              min="0"
+              type="text"
+              inputMode="numeric"
               required
               value={km}
-              onChange={(e) => setKm(e.target.value)}
-              placeholder="85000"
+              onChange={(e) => setKm(formatMiles(e.target.value))}
+              placeholder="85.000"
               className="h-12 rounded-xl"
             />
           </div>

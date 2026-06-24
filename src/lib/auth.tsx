@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { authApi, tokenValido } from "@/lib/auth-api";
+import { useRouter } from "@tanstack/react-router";
+import { authApi, tokenValido, SESION_INVALIDA_EVENT } from "@/lib/auth-api";
 
 type Session = {
   token: string;
@@ -39,10 +40,35 @@ function loadSession(): Session | null {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     setSession(loadSession());
   }, []);
+
+  useEffect(() => {
+    const onInvalida = () => {
+      logout();
+      router.navigate({ to: "/" });
+    };
+    window.addEventListener(SESION_INVALIDA_EVENT, onInvalida);
+    return () => window.removeEventListener(SESION_INVALIDA_EVENT, onInvalida);
+  }, [router]);
+
+  useEffect(() => {
+    if (!session) return;
+    const ms = new Date(session.expira).getTime() - Date.now();
+    const expirar = () => {
+      logout();
+      router.navigate({ to: "/" });
+    };
+    if (ms <= 0) {
+      expirar();
+      return;
+    }
+    const t = setTimeout(expirar, ms);
+    return () => clearTimeout(t);
+  }, [session, router]);
 
   const login: AuthContextValue["login"] = async (usuario, password, recordar = true) => {
     const r = await authApi.login(usuario, password);
