@@ -26,6 +26,14 @@ export function usePwaInstall() {
   const ios = isIOS();
 
   useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register(`${import.meta.env.BASE_URL}sw.js`)
+        .catch(() => {});
+    }
+  }, []);
+
+  useEffect(() => {
     const onPrompt = (e: Event) => {
       e.preventDefault();
       setDeferred(e as BeforeInstallPromptEvent);
@@ -43,7 +51,9 @@ export function usePwaInstall() {
   }, []);
 
   // En Android/desktop hay prompt nativo; en iOS hay que guiar manualmente.
-  const canInstall = !installed && (deferred !== null || ios);
+  // Si no llega el prompt nativo (dev, o navegador que ya lo consumió),
+  // mostramos igual el botón con instrucciones manuales.
+  const canInstall = !installed;
 
   const promptInstall = async () => {
     if (!deferred) return false;

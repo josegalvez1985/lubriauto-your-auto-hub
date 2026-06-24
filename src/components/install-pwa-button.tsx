@@ -12,7 +12,8 @@ export function InstallPwaButton({ className }: { className?: string }) {
   const handleClick = () => {
     if (hasNativePrompt) {
       promptInstall();
-    } else if (ios) {
+    } else {
+      // iOS o navegador sin prompt nativo: mostramos pasos manuales.
       setShowIosHelp(true);
     }
   };
