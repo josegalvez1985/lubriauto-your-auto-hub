@@ -6,7 +6,8 @@
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
-const base = process.env.GITHUB_PAGES ? "/lubriauto-your-auto-hub/" : "/";
+// Con dominio propio (lubrimec.shop via CNAME) el sitio se sirve desde la raíz.
+const base = "/";
 
 export default defineConfig({
   // GitHub Pages no tiene servidor: build estatico SPA (sin nitro/Cloudflare).
