@@ -46,7 +46,7 @@ export function AutoFormDialog({
       : await autosApi.crear(token, payload);
     setLoading(false);
     if (r.ok) {
-      toast.success(r.mensaje ?? (editando ? "Auto actualizado" : "Auto creado"));
+      toast.success(r.mensaje ?? (editando ? "Vehículo actualizado" : "Vehículo creado"));
       onOpenChange(false);
       onSaved();
     } else {
@@ -58,7 +58,7 @@ export function AutoFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md rounded-2xl">
         <DialogHeader>
-          <DialogTitle>{editando ? "Editar auto" : "Nuevo auto"}</DialogTitle>
+          <DialogTitle>{editando ? "Editar vehículo" : "Nuevo vehículo"}</DialogTitle>
           <DialogDescription>
             {editando ? "Actualiza los datos de tu vehículo." : "Registra un vehículo en tu cuenta."}
           </DialogDescription>
@@ -104,7 +104,7 @@ export function AutoFormDialog({
             className="w-full h-12 rounded-xl text-white border-0 disabled:opacity-60"
             style={{ background: "var(--gradient-accent)" }}
           >
-            {loading ? "Guardando…" : editando ? "Guardar cambios" : "Crear auto"}
+            {loading ? "Guardando…" : editando ? "Guardar cambios" : "Crear vehículo"}
           </Button>
         </form>
       </DialogContent>

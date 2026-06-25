@@ -104,7 +104,7 @@ function Dashboard() {
             <nav className="hidden lg:flex items-center gap-1">
               {[
                 { icon: HomeIcon, label: "Inicio", active: true },
-                { icon: Car, label: "Autos", to: "/autos" as const },
+                { icon: Car, label: "Vehículos", to: "/autos" as const },
                 { icon: History, label: "Historial", to: "/historial" as const },
                 { icon: ServiceIcon, label: "Servicios", to: "/historial" as const },
                 { icon: Bell, label: "Avisos" },
@@ -168,7 +168,7 @@ function Dashboard() {
                     {cargando ? "Cargando…" : auto?.descripcion ?? "Sin vehículos"}
                   </h2>
                   <p className="text-white/60 text-sm">
-                    {auto ? (auto.placa ? `Placa ${auto.placa}` : "Sin placa") : "Agrega tu primer auto"}
+                    {auto ? (auto.placa ? `Placa ${auto.placa}` : "Sin placa") : "Agrega tu primer vehículo"}
                   </p>
                 </div>
                 <Car className="h-10 w-10 text-white/40 shrink-0" />
@@ -272,7 +272,7 @@ function Dashboard() {
         <ul className="flex items-end justify-around">
           {[
             { icon: HomeIcon, label: "Inicio", active: true },
-            { icon: Car, label: "Autos", to: "/autos" as const },
+            { icon: Car, label: "Vehículos", to: "/autos" as const },
             { icon: Plus, label: "Servicio", primary: true, to: "/historial" as const, search: { nuevo: true } },
             { icon: History, label: "Historial", to: "/historial" as const },
             { icon: Settings, label: "Ajustes", to: "/profile" as const },

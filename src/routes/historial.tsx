@@ -7,12 +7,15 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ArrowLeft, History, Plus, Pencil, Trash2, Gauge, Wrench } from "lucide-react";
+import { ArrowLeft, History, Plus, Pencil, Trash2, Gauge, Wrench, Download } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { autosApi, type Auto } from "@/lib/autos-api";
 import { serviciosApi, type Servicio } from "@/lib/servicios-api";
 import { mensajeLimpio } from "@/lib/auth-api";
 import { ServicioFormDialog } from "@/components/servicio-form-dialog";
+import { exportarHistorialPdf } from "@/lib/historial-pdf";
+
+const logoUrl = `${import.meta.env.BASE_URL}icon-512.png`;
 
 export const Route = createFileRoute("/historial")({
   validateSearch: (s: Record<string, unknown>): { nuevo?: boolean } => ({
@@ -114,6 +117,15 @@ function HistorialPage() {
   const autoSel = autos.find((a) => a.id_auto === autoId) ?? null;
   const totalGastado = servicios.reduce((acc, s) => acc + (s.costo || 0), 0);
 
+  const handleExportarPdf = async () => {
+    if (!autoSel || servicios.length === 0) return;
+    try {
+      await exportarHistorialPdf(autoSel, servicios, logoUrl);
+    } catch {
+      toast.error("No se pudo generar el PDF");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background pb-12">
       <header
@@ -157,11 +169,11 @@ function HistorialPage() {
           <Card className="h-12 rounded-2xl animate-pulse bg-muted/50 border-0" />
         ) : autos.length === 0 ? (
           <Card className="p-8 rounded-2xl text-center shadow-[var(--shadow-card)]">
-            <h3 className="font-bold text-lg">No tienes autos registrados</h3>
+            <h3 className="font-bold text-lg">No tienes vehículos registrados</h3>
             <p className="text-sm text-muted-foreground mt-1">Agrega un vehículo para registrar servicios.</p>
             <Link to="/autos">
               <Button className="mt-5 rounded-xl text-white border-0" style={{ background: "var(--gradient-accent)" }}>
-                Ir a mis autos
+                Ir a mis vehículos
               </Button>
             </Link>
           </Card>
@@ -185,15 +197,24 @@ function HistorialPage() {
 
         {/* Totalizador */}
         {autos.length > 0 && !loading && servicios.length > 0 && (
-          <Card className="p-4 rounded-2xl shadow-[var(--shadow-card)] flex items-center justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">Total gastado</p>
-              <p className="text-2xl font-bold" style={{ color: "var(--brand-orange)" }}>{fmtMoneda(totalGastado)}</p>
+          <Card className="p-4 rounded-2xl shadow-[var(--shadow-card)] space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">Total gastado</p>
+                <p className="text-2xl font-bold" style={{ color: "var(--brand-orange)" }}>{fmtMoneda(totalGastado)}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">Servicios</p>
+                <p className="text-2xl font-bold">{servicios.length}</p>
+              </div>
             </div>
-            <div className="text-right">
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">Servicios</p>
-              <p className="text-2xl font-bold">{servicios.length}</p>
-            </div>
+            <Button
+              variant="outline"
+              onClick={handleExportarPdf}
+              className="w-full rounded-xl"
+            >
+              <Download className="h-4 w-4 mr-1.5" /> Descargar PDF
+            </Button>
           </Card>
         )}
 

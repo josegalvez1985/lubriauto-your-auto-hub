@@ -16,7 +16,7 @@ import { AutoFormDialog } from "@/components/auto-form-dialog";
 export const Route = createFileRoute("/autos")({
   head: () => ({
     meta: [
-      { title: "LubriAuto — Mis autos" },
+      { title: "LubriAuto — Mis vehículos" },
       { name: "description", content: "Gestiona los vehículos registrados en tu cuenta." },
     ],
   }),
@@ -70,7 +70,7 @@ function AutosPage() {
     if (!toDelete) return;
     const r = await autosApi.eliminar(token, toDelete.id_auto);
     if (r.ok) {
-      toast.success("Auto inactivado");
+      toast.success("Vehículo inactivado");
       setToDelete(null);
       cargar();
     } else {
@@ -97,7 +97,7 @@ function AutosPage() {
               className="rounded-xl text-white border-0 h-10"
               style={{ background: "var(--gradient-accent)", boxShadow: "var(--shadow-accent)" }}
             >
-              <Plus className="h-4 w-4 mr-1.5" /> Nuevo auto
+              <Plus className="h-4 w-4 mr-1.5" /> Nuevo vehículo
             </Button>
           </div>
           <div className="mt-6 flex items-center gap-3">
@@ -105,7 +105,7 @@ function AutosPage() {
               <Car className="h-6 w-6" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold">Mis autos</h1>
+              <h1 className="text-2xl font-bold">Mis vehículos</h1>
               <p className="text-white/60 text-sm">
                 {autos.length} {autos.length === 1 ? "vehículo registrado" : "vehículos registrados"}
               </p>
@@ -127,11 +127,11 @@ function AutosPage() {
                  style={{ background: "color-mix(in oklab, var(--brand-navy) 10%, transparent)", color: "var(--brand-navy)" }}>
               <Car className="h-7 w-7" />
             </div>
-            <h3 className="font-bold text-lg">No tienes autos registrados</h3>
+            <h3 className="font-bold text-lg">No tienes vehículos registrados</h3>
             <p className="text-sm text-muted-foreground mt-1">Agrega tu primer vehículo para empezar.</p>
             <Button onClick={handleNuevo} className="mt-5 rounded-xl text-white border-0"
                     style={{ background: "var(--gradient-accent)" }}>
-              <Plus className="h-4 w-4 mr-1.5" /> Agregar auto
+              <Plus className="h-4 w-4 mr-1.5" /> Agregar vehículo
             </Button>
           </Card>
         ) : (
@@ -187,7 +187,7 @@ function AutosPage() {
       <AlertDialog open={!!toDelete} onOpenChange={(o) => !o && setToDelete(null)}>
         <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Inactivar este auto?</AlertDialogTitle>
+            <AlertDialogTitle>¿Inactivar este vehículo?</AlertDialogTitle>
             <AlertDialogDescription>
               {toDelete?.descripcion} (placa {toDelete?.placa}) se marcará como inactivo.
             </AlertDialogDescription>
