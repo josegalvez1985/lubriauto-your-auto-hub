@@ -10,9 +10,9 @@ import {
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/lib/auth";
+import { leerFoto } from "@/lib/foto-perfil";
 import { autosApi, type Auto } from "@/lib/autos-api";
 import { serviciosApi, type Servicio } from "@/lib/servicios-api";
-import { InstallPwaBanner } from "@/components/install-pwa-banner";
 
 const logoUrl = `${import.meta.env.BASE_URL}icon-512.png`;
 
@@ -33,6 +33,12 @@ function Dashboard() {
   const [autoId, setAutoId] = useState<number | null>(null);
   const [servicios, setServicios] = useState<Servicio[]>([]);
   const [cargando, setCargando] = useState(true);
+  const [foto, setFoto] = useState<string | null>(null);
+
+  useEffect(() => {
+    setFoto(leerFoto(session?.username ?? ""));
+  }, [session?.username]);
+
   const auto = autos.find((a) => a.id_auto === autoId) ?? null;
   const ultimo = servicios[0] ?? null;
 
@@ -91,9 +97,15 @@ function Dashboard() {
         <div className="relative z-10 max-w-6xl mx-auto">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 px-1 py-1 -mx-1">
-              <div className="h-14 w-14 shrink-0 rounded-2xl bg-white/10 backdrop-blur p-2 ring-1 ring-white/15 flex items-center justify-center">
-                <img src={logoUrl} alt="LubriAuto" className="h-full w-full object-contain rounded-xl" />
-              </div>
+              {foto ? (
+                <Link to="/profile" className="aureola h-14 w-14 shrink-0" title="Mi perfil">
+                  <img src={foto} alt="Foto de perfil" className="h-full w-full rounded-full object-cover" />
+                </Link>
+              ) : (
+                <div className="h-14 w-14 shrink-0 rounded-2xl bg-white/10 backdrop-blur p-2 ring-1 ring-white/15 flex items-center justify-center">
+                  <img src={logoUrl} alt="LubriAuto" className="h-full w-full object-contain rounded-xl" />
+                </div>
+              )}
               <div>
                 <p className="text-xs text-white/60">Hola de nuevo,</p>
                 <p className="font-semibold">{session?.nombre ?? "Bienvenido"}</p>
@@ -206,7 +218,7 @@ function Dashboard() {
                     : `Vencido por ${Math.abs(kmRestante).toLocaleString("es")} km`}
               </p>
               <Link to="/historial">
-                <Button className="mt-5 bg-white text-foreground hover:bg-white/90 rounded-xl font-semibold">
+                <Button className="mt-5 bg-white text-foreground hover:bg-white/90 rounded-[6px] font-semibold">
                   Registrar servicio
                 </Button>
               </Link>
@@ -305,8 +317,6 @@ function Dashboard() {
           })}
         </ul>
       </nav>
-
-      <InstallPwaBanner liftOnMobile />
     </div>
   );
 }

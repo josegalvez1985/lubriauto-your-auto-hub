@@ -94,7 +94,7 @@ function AutosPage() {
             </Link>
             <Button
               onClick={handleNuevo}
-              className="rounded-xl text-white border-0 h-10"
+              className="rounded-[6px] text-white border-0 h-10"
               style={{ background: "var(--gradient-accent)", boxShadow: "var(--shadow-accent)" }}
             >
               <Plus className="h-4 w-4 mr-1.5" /> Nuevo vehículo
@@ -129,7 +129,7 @@ function AutosPage() {
             </div>
             <h3 className="font-bold text-lg">No tienes vehículos registrados</h3>
             <p className="text-sm text-muted-foreground mt-1">Agrega tu primer vehículo para empezar.</p>
-            <Button onClick={handleNuevo} className="mt-5 rounded-xl text-white border-0"
+            <Button onClick={handleNuevo} className="mt-5 rounded-[6px] text-white border-0"
                     style={{ background: "var(--gradient-accent)" }}>
               <Plus className="h-4 w-4 mr-1.5" /> Agregar vehículo
             </Button>
@@ -161,10 +161,10 @@ function AutosPage() {
                     </p>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Button size="icon" variant="ghost" className="rounded-xl" onClick={() => handleEditar(a)}>
+                    <Button size="icon" variant="ghost" className="rounded-[6px]" onClick={() => handleEditar(a)}>
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button size="icon" variant="ghost" className="rounded-xl text-destructive hover:text-destructive"
+                    <Button size="icon" variant="ghost" className="rounded-[6px] text-destructive hover:text-destructive"
                             onClick={() => setToDelete(a)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -193,9 +193,9 @@ function AutosPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-[6px]">Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handleEliminar}
-                               className="rounded-xl bg-destructive text-white hover:bg-destructive/90">
+                               className="rounded-[6px] bg-destructive text-white hover:bg-destructive/90">
               Inactivar
             </AlertDialogAction>
           </AlertDialogFooter>

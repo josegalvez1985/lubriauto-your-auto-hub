@@ -9,6 +9,8 @@ import { User, Mail, Lock, Phone, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { authApi, mensajeLimpio } from "@/lib/auth-api";
 import { useAuth } from "@/lib/auth";
+import { cuentaApi } from "@/lib/cuenta-api";
+import { ReactivarCuentaDialog } from "@/components/reactivar-cuenta-dialog";
 
 const logoUrl = `${import.meta.env.BASE_URL}icon-512.png`;
 
@@ -29,6 +31,7 @@ function RegistroPage() {
   const [password, setPassword] = useState("");
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [reactivarOpen, setReactivarOpen] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -40,6 +43,14 @@ function RegistroPage() {
     }
     setLoading(true);
     const correo = email.trim();
+    // Si el correo tiene una cuenta dada de baja, se ofrece reactivarla en vez
+    // de registrar. Si la consulta falla, el registro sigue como siempre.
+    const estado = await cuentaApi.estado(correo);
+    if (estado.ok && estado.inactiva) {
+      setLoading(false);
+      setReactivarOpen(true);
+      return;
+    }
     const r = await authApi.registrar(correo, correo, nombre.trim(), password, telefono.trim());
     if (!r.ok) {
       setLoading(false);
@@ -76,24 +87,24 @@ function RegistroPage() {
           <form className="space-y-4" onSubmit={handleSubmit}>
             <Field id="nombre" label="Nombre completo" icon={User}>
               <Input id="nombre" required value={nombre} onChange={(e) => setNombre(e.target.value)}
-                     placeholder="Jose Galvez" className="pl-10 h-12 rounded-xl" />
+                     placeholder="Jose Galvez" className="pl-10 h-12 rounded-[6px]" />
             </Field>
 
             <Field id="email" label="Correo electrónico" icon={Mail}>
               <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-                     placeholder="tu@correo.com" className="pl-10 h-12 rounded-xl" />
+                     placeholder="tu@correo.com" className="pl-10 h-12 rounded-[6px]" />
             </Field>
 
             <Field id="telefono" label="Teléfono (opcional)" icon={Phone}>
               <Input id="telefono" type="tel" autoComplete="tel" value={telefono}
                      onChange={(e) => setTelefono(e.target.value)}
-                     placeholder="0991234567" className="pl-10 h-12 rounded-xl" />
+                     placeholder="0991234567" className="pl-10 h-12 rounded-[6px]" />
             </Field>
 
             <Field id="password" label="Contraseña" icon={Lock}>
               <Input id="password" type={showPwd ? "text" : "password"} required autoComplete="new-password"
                      minLength={6} value={password} onChange={(e) => setPassword(e.target.value)}
-                     placeholder="Mínimo 6 caracteres" className="pl-10 pr-10 h-12 rounded-xl" />
+                     placeholder="Mínimo 6 caracteres" className="pl-10 pr-10 h-12 rounded-[6px]" />
               <button type="button" onClick={() => setShowPwd((v) => !v)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                       aria-label="Mostrar contraseña">
@@ -102,7 +113,7 @@ function RegistroPage() {
             </Field>
 
             <Button type="submit" disabled={loading}
-                    className="w-full h-12 rounded-xl text-base font-semibold text-white border-0 hover:opacity-95 transition disabled:opacity-60"
+                    className="w-full h-12 rounded-[6px] text-base font-semibold text-white border-0 hover:opacity-95 transition disabled:opacity-60"
                     style={{ background: "var(--gradient-accent)", boxShadow: "var(--shadow-accent)" }}>
               {loading ? "Creando cuenta…" : "Crear cuenta"}
             </Button>
@@ -113,6 +124,13 @@ function RegistroPage() {
           </Link>
         </Card>
       </div>
+
+      <ReactivarCuentaDialog
+        open={reactivarOpen}
+        onOpenChange={setReactivarOpen}
+        email={email.trim()}
+        passwordInicial={password}
+      />
     </div>
   );
 }

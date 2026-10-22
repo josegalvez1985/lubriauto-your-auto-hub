@@ -1,15 +1,17 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
-  ArrowLeft, Moon, Fingerprint, Bell, User, Mail, ChevronRight, LogOut, ShieldCheck,
+  ArrowLeft, Moon, Fingerprint, Bell, User, Mail, ChevronRight, LogOut, ShieldCheck, UserX, Camera,
+  BookOpen,
 } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
-import { InstallPwaButton } from "@/components/install-pwa-button";
 import { useAuth } from "@/lib/auth";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
+import { BajaCuentaDialog } from "@/components/baja-cuenta-dialog";
+import { borrarFoto, guardarFoto, leerFoto, reducirFoto } from "@/lib/foto-perfil";
 import { biometricEnabled, biometricAvailable, biometricEnroll, biometricDisable } from "@/lib/biometric";
 import { toast } from "sonner";
 
@@ -31,6 +33,33 @@ function ProfilePage() {
   const [biometricSupported, setBiometricSupported] = useState(false);
   const [notifications, setNotifications] = useState(true);
   const [pwdOpen, setPwdOpen] = useState(false);
+  const [bajaOpen, setBajaOpen] = useState(false);
+  const [foto, setFoto] = useState<string | null>(null);
+  const archivo = useRef<HTMLInputElement>(null);
+  const usuario = session?.username ?? "";
+
+  useEffect(() => {
+    setFoto(leerFoto(usuario));
+  }, [usuario]);
+
+  const handleFoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    e.target.value = ""; // que elegir la misma foto otra vez también dispare el cambio
+    if (!f || !usuario) return;
+    try {
+      const dataUrl = await reducirFoto(f);
+      guardarFoto(usuario, dataUrl);
+      setFoto(dataUrl);
+      toast.success("Foto de perfil actualizada.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "No se pudo guardar la foto.");
+    }
+  };
+
+  const handleQuitarFoto = () => {
+    borrarFoto(usuario);
+    setFoto(null);
+  };
 
   const handleLogout = () => {
     logout();
@@ -78,14 +107,36 @@ function ProfilePage() {
             </Button>
           </Link>
           <div className="mt-6 flex items-center gap-4">
-            <div className="h-20 w-20 shrink-0 rounded-2xl bg-white/10 backdrop-blur ring-1 ring-white/15 flex items-center justify-center">
-              <User className="h-9 w-9 text-white/80" />
-            </div>
-            <div>
+            <button
+              type="button"
+              onClick={() => archivo.current?.click()}
+              disabled={!usuario}
+              aria-label={foto ? "Cambiar foto de perfil" : "Agregar foto de perfil"}
+              title={foto ? "Cambiar foto" : "Agregar foto"}
+              className="relative h-20 w-20 shrink-0 rounded-2xl bg-white/10 backdrop-blur ring-1 ring-white/15 flex items-center justify-center transition hover:ring-white/40 disabled:cursor-default"
+            >
+              {foto ? (
+                <img src={foto} alt="Foto de perfil" className="h-full w-full rounded-2xl object-cover" />
+              ) : (
+                <User className="h-9 w-9 text-white/80" />
+              )}
+              <span className="absolute -bottom-1.5 -right-1.5 h-7 w-7 rounded-full flex items-center justify-center text-white ring-2 ring-[color:var(--brand-navy-deep)]"
+                    style={{ background: "var(--gradient-accent)" }}>
+                <Camera className="h-3.5 w-3.5" />
+              </span>
+            </button>
+            <input ref={archivo} type="file" accept="image/*" className="hidden" onChange={handleFoto} />
+            <div className="min-w-0">
               <h1 className="text-2xl font-bold">{session?.nombre ?? "Mi cuenta"}</h1>
               <p className="text-white/70 text-sm flex items-center gap-1.5">
                 <Mail className="h-3.5 w-3.5" /> {session?.username ?? "—"}
               </p>
+              {foto && (
+                <button type="button" onClick={handleQuitarFoto}
+                        className="mt-1 text-xs text-white/60 hover:text-white underline-offset-2 hover:underline">
+                  Quitar foto
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -124,18 +175,21 @@ function ProfilePage() {
           </SettingRow>
         </Card>
 
+        {/* Ayuda */}
+        <Card className="p-2 rounded-2xl shadow-[var(--shadow-card)]">
+          <LinkRow icon={BookOpen} title="Manual de uso" onClick={() => navigate({ to: "/manual" })} />
+        </Card>
+
         {/* Cuenta */}
         <Card className="p-2 rounded-2xl shadow-[var(--shadow-card)] divide-y divide-border">
           <LinkRow icon={User} title="Datos personales" />
           <LinkRow icon={ShieldCheck} title="Seguridad y contraseña" onClick={() => setPwdOpen(true)} />
+          <LinkRow icon={UserX} title="Dar de baja mi cuenta" peligro onClick={() => setBajaOpen(true)} />
         </Card>
-
-        {/* Instalar app */}
-        <InstallPwaButton className="w-full h-12 rounded-xl" />
 
         {/* Cerrar sesión */}
         <Button onClick={handleLogout} variant="ghost"
-                className="w-full h-12 rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10">
+                className="w-full h-12 rounded-[6px] text-destructive hover:text-destructive hover:bg-destructive/10">
           <LogOut className="h-4 w-4 mr-2" /> Cerrar sesión
         </Button>
       </main>
@@ -145,6 +199,8 @@ function ProfilePage() {
         onOpenChange={setPwdOpen}
         username={session?.username ?? ""}
       />
+
+      <BajaCuentaDialog open={bajaOpen} onOpenChange={setBajaOpen} />
     </div>
   );
 }
@@ -169,14 +225,19 @@ function SettingRow({
   );
 }
 
-function LinkRow({ icon: Icon, title, onClick }: { icon: React.ElementType; title: string; onClick?: () => void }) {
+function LinkRow({
+  icon: Icon, title, onClick, peligro = false,
+}: {
+  icon: React.ElementType; title: string; onClick?: () => void; peligro?: boolean;
+}) {
+  const color = peligro ? "var(--destructive)" : "var(--brand-navy)";
   return (
     <button onClick={onClick} className="flex w-full items-center gap-4 p-4 text-left">
       <span className="h-11 w-11 shrink-0 rounded-xl flex items-center justify-center"
-            style={{ background: "color-mix(in oklab, var(--brand-navy) 10%, transparent)", color: "var(--brand-navy)" }}>
+            style={{ background: `color-mix(in oklab, ${color} 10%, transparent)`, color }}>
         <Icon className="h-5 w-5" />
       </span>
-      <span className="flex-1 font-semibold text-sm text-foreground">{title}</span>
+      <span className={`flex-1 font-semibold text-sm ${peligro ? "text-destructive" : "text-foreground"}`}>{title}</span>
       <ChevronRight className="h-4 w-4 text-muted-foreground" />
     </button>
   );

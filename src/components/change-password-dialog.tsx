@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { Lock } from "lucide-react";
+import { Lock, Eye, EyeOff } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
@@ -18,6 +18,8 @@ export function ChangePasswordDialog({
 }) {
   const [actual, setActual] = useState("");
   const [nuevo, setNuevo] = useState("");
+  const [showActual, setShowActual] = useState(false);
+  const [showNuevo, setShowNuevo] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,6 +36,8 @@ export function ChangePasswordDialog({
       onOpenChange(false);
       setActual("");
       setNuevo("");
+      setShowActual(false);
+      setShowNuevo(false);
     } else {
       toast.error(mensajeLimpio(r.error));
     }
@@ -49,18 +53,18 @@ export function ChangePasswordDialog({
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
-          <Field id="pwd-actual" label="Contraseña actual">
-            <Input id="pwd-actual" type="password" required autoComplete="current-password"
+          <Field id="pwd-actual" label="Contraseña actual" show={showActual} onToggle={() => setShowActual((v) => !v)}>
+            <Input id="pwd-actual" type={showActual ? "text" : "password"} required autoComplete="current-password"
                    value={actual} onChange={(e) => setActual(e.target.value)}
-                   placeholder="••••••••" className="pl-10 h-12 rounded-xl" />
+                   placeholder="••••••••" className="pl-10 pr-10 h-12 rounded-[6px]" />
           </Field>
-          <Field id="pwd-nueva" label="Nueva contraseña">
-            <Input id="pwd-nueva" type="password" required autoComplete="new-password" minLength={6}
+          <Field id="pwd-nueva" label="Nueva contraseña" show={showNuevo} onToggle={() => setShowNuevo((v) => !v)}>
+            <Input id="pwd-nueva" type={showNuevo ? "text" : "password"} required autoComplete="new-password" minLength={6}
                    value={nuevo} onChange={(e) => setNuevo(e.target.value)}
-                   placeholder="Mínimo 6 caracteres" className="pl-10 h-12 rounded-xl" />
+                   placeholder="Mínimo 6 caracteres" className="pl-10 pr-10 h-12 rounded-[6px]" />
           </Field>
           <Button type="submit" disabled={loading}
-                  className="w-full h-12 rounded-xl text-white border-0 disabled:opacity-60"
+                  className="w-full h-12 rounded-[6px] text-white border-0 disabled:opacity-60"
                   style={{ background: "var(--gradient-accent)" }}>
             {loading ? "Guardando…" : "Actualizar contraseña"}
           </Button>
@@ -70,13 +74,25 @@ export function ChangePasswordDialog({
   );
 }
 
-function Field({ id, label, children }: { id: string; label: string; children: React.ReactNode }) {
+function Field({
+  id, label, show, onToggle, children,
+}: {
+  id: string; label: string; show: boolean; onToggle: () => void; children: React.ReactNode;
+}) {
   return (
     <div className="space-y-2">
       <Label htmlFor={id}>{label}</Label>
       <div className="relative">
         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         {children}
+        <button
+          type="button"
+          onClick={onToggle}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          aria-label={show ? "Ocultar contraseña" : "Mostrar contraseña"}
+        >
+          {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+        </button>
       </div>
     </div>
   );

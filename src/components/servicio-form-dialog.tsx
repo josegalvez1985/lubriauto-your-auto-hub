@@ -304,7 +304,7 @@ export function ServicioFormDialog({
               onFocus={() => setShowSugerencias(true)}
               onBlur={() => setTimeout(() => setShowSugerencias(false), 150)}
               placeholder="Cambio de aceite 5W-30"
-              className="rounded-xl resize-none"
+              className="rounded-[6px] resize-none"
             />
             {showSugerencias && sugerencias.length > 0 && (
               <ul className="absolute z-50 left-0 right-0 mt-1 max-h-56 overflow-y-auto rounded-xl border bg-popover text-popover-foreground shadow-md">
@@ -333,7 +333,7 @@ export function ServicioFormDialog({
                 value={km}
                 onChange={(e) => setKm(formatMiles(e.target.value))}
                 placeholder="46.500"
-                className="h-12 rounded-xl"
+                className="h-12 rounded-[6px]"
               />
             </div>
             <div className="space-y-2">
@@ -345,7 +345,7 @@ export function ServicioFormDialog({
                 value={costo}
                 onChange={(e) => setCosto(formatMiles(e.target.value))}
                 placeholder="180.000"
-                className="h-12 rounded-xl"
+                className="h-12 rounded-[6px]"
               />
             </div>
           </div>
@@ -357,13 +357,13 @@ export function ServicioFormDialog({
               required
               value={fecha}
               onChange={(e) => setFecha(e.target.value)}
-              className="h-12 rounded-xl"
+              className="h-12 rounded-[6px]"
             />
           </div>
           <Button
             type="submit"
             disabled={loading}
-            className="w-full h-12 rounded-xl text-white border-0 disabled:opacity-60"
+            className="w-full h-12 rounded-[6px] text-white border-0 disabled:opacity-60"
             style={{ background: "var(--gradient-accent)" }}
           >
             {loading ? "Guardando…" : editando ? "Guardar cambios" : "Registrar servicio"}

@@ -143,7 +143,7 @@ function HistorialPage() {
             <Button
               onClick={handleNuevo}
               disabled={autoId === null}
-              className="rounded-xl text-white border-0 h-10 disabled:opacity-50"
+              className="rounded-[6px] text-white border-0 h-10 disabled:opacity-50"
               style={{ background: "var(--gradient-accent)", boxShadow: "var(--shadow-accent)" }}
             >
               <Plus className="h-4 w-4 mr-1.5" /> Nuevo servicio
@@ -172,7 +172,7 @@ function HistorialPage() {
             <h3 className="font-bold text-lg">No tienes vehículos registrados</h3>
             <p className="text-sm text-muted-foreground mt-1">Agrega un vehículo para registrar servicios.</p>
             <Link to="/autos">
-              <Button className="mt-5 rounded-xl text-white border-0" style={{ background: "var(--gradient-accent)" }}>
+              <Button className="mt-5 rounded-[6px] text-white border-0" style={{ background: "var(--gradient-accent)" }}>
                 Ir a mis vehículos
               </Button>
             </Link>
@@ -211,7 +211,7 @@ function HistorialPage() {
             <Button
               variant="outline"
               onClick={handleExportarPdf}
-              className="w-full rounded-xl"
+              className="w-full rounded-[6px]"
             >
               <Download className="h-4 w-4 mr-1.5" /> Descargar PDF
             </Button>
@@ -234,7 +234,7 @@ function HistorialPage() {
               </div>
               <h3 className="font-bold text-lg">Sin servicios registrados</h3>
               <p className="text-sm text-muted-foreground mt-1">Registra el primer servicio de este vehículo.</p>
-              <Button onClick={handleNuevo} className="mt-5 rounded-xl text-white border-0"
+              <Button onClick={handleNuevo} className="mt-5 rounded-[6px] text-white border-0"
                       style={{ background: "var(--gradient-accent)" }}>
                 <Plus className="h-4 w-4 mr-1.5" /> Registrar servicio
               </Button>
@@ -258,10 +258,10 @@ function HistorialPage() {
                       {fmtMoneda(s.costo)}
                     </span>
                     <div className="flex items-center gap-1">
-                      <Button size="icon" variant="ghost" className="rounded-xl" onClick={() => handleEditar(s)}>
+                      <Button size="icon" variant="ghost" className="rounded-[6px]" onClick={() => handleEditar(s)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button size="icon" variant="ghost" className="rounded-xl text-destructive hover:text-destructive"
+                      <Button size="icon" variant="ghost" className="rounded-[6px] text-destructive hover:text-destructive"
                               onClick={() => setToDelete(s)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -294,9 +294,9 @@ function HistorialPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-[6px]">Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handleEliminar}
-                               className="rounded-xl bg-destructive text-white hover:bg-destructive/90">
+                               className="rounded-[6px] bg-destructive text-white hover:bg-destructive/90">
               Eliminar
             </AlertDialogAction>
           </AlertDialogFooter>

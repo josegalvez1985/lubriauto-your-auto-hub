@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegistroRouteImport } from './routes/registro'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as ManualRouteImport } from './routes/manual'
 import { Route as HistorialRouteImport } from './routes/historial'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AutosRouteImport } from './routes/autos'
@@ -24,6 +25,11 @@ const RegistroRoute = RegistroRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ManualRoute = ManualRouteImport.update({
+  id: '/manual',
+  path: '/manual',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HistorialRoute = HistorialRouteImport.update({
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/autos': typeof AutosRoute
   '/dashboard': typeof DashboardRoute
   '/historial': typeof HistorialRoute
+  '/manual': typeof ManualRoute
   '/profile': typeof ProfileRoute
   '/registro': typeof RegistroRoute
 }
@@ -60,6 +67,7 @@ export interface FileRoutesByTo {
   '/autos': typeof AutosRoute
   '/dashboard': typeof DashboardRoute
   '/historial': typeof HistorialRoute
+  '/manual': typeof ManualRoute
   '/profile': typeof ProfileRoute
   '/registro': typeof RegistroRoute
 }
@@ -69,6 +77,7 @@ export interface FileRoutesById {
   '/autos': typeof AutosRoute
   '/dashboard': typeof DashboardRoute
   '/historial': typeof HistorialRoute
+  '/manual': typeof ManualRoute
   '/profile': typeof ProfileRoute
   '/registro': typeof RegistroRoute
 }
@@ -79,16 +88,25 @@ export interface FileRouteTypes {
     | '/autos'
     | '/dashboard'
     | '/historial'
+    | '/manual'
     | '/profile'
     | '/registro'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/autos' | '/dashboard' | '/historial' | '/profile' | '/registro'
+  to:
+    | '/'
+    | '/autos'
+    | '/dashboard'
+    | '/historial'
+    | '/manual'
+    | '/profile'
+    | '/registro'
   id:
     | '__root__'
     | '/'
     | '/autos'
     | '/dashboard'
     | '/historial'
+    | '/manual'
     | '/profile'
     | '/registro'
   fileRoutesById: FileRoutesById
@@ -98,6 +116,7 @@ export interface RootRouteChildren {
   AutosRoute: typeof AutosRoute
   DashboardRoute: typeof DashboardRoute
   HistorialRoute: typeof HistorialRoute
+  ManualRoute: typeof ManualRoute
   ProfileRoute: typeof ProfileRoute
   RegistroRoute: typeof RegistroRoute
 }
@@ -116,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/manual': {
+      id: '/manual'
+      path: '/manual'
+      fullPath: '/manual'
+      preLoaderRoute: typeof ManualRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/historial': {
@@ -154,6 +180,7 @@ const rootRouteChildren: RootRouteChildren = {
   AutosRoute: AutosRoute,
   DashboardRoute: DashboardRoute,
   HistorialRoute: HistorialRoute,
+  ManualRoute: ManualRoute,
   ProfileRoute: ProfileRoute,
   RegistroRoute: RegistroRoute,
 }

@@ -53,14 +53,14 @@ export function ResetPasswordDialog({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="tu@correo.com"
-                className="pl-10 h-12 rounded-xl"
+                className="pl-10 h-12 rounded-[6px]"
               />
             </div>
           </div>
           <Button
             type="submit"
             disabled={loading}
-            className="w-full h-12 rounded-xl text-white border-0 disabled:opacity-60"
+            className="w-full h-12 rounded-[6px] text-white border-0 disabled:opacity-60"
             style={{ background: "var(--gradient-accent)" }}
           >
             {loading ? "Enviando…" : "Enviar contraseña temporal"}

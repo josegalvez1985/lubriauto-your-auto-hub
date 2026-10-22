@@ -5,17 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Design system definition.
- *
- * The @theme inline block maps CSS custom properties to Tailwind utility
- * classes (e.g. --color-primary -> bg-primary, text-primary).
- *
- * The :root and .dark blocks define the actual color values using oklch.
- * All colors MUST use oklch format.
- *
- * To add a new semantic color:
- * 1. Add the variable to :root (light value) and .dark (dark value)
- * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ * Sistema de diseño: @theme inline mapea las variables CSS a utilidades de
+ * Tailwind (ej. --color-primary -> bg-primary). Los valores de tema claro y
+ * oscuro están en :root y .dark.
  */
 
 @theme inline {
@@ -162,5 +154,124 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+  }
+}
+
+/* Fondo del login (src/routes/index.tsx). */
+.login-fondo {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Patrón de herramientas (íconos de lucide), pintado en el color del texto. */
+.login-fondo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--foreground);
+  opacity: 0.08;
+  mask-image: url("./assets/patron-herramientas.svg");
+  mask-size: 240px 240px;
+  mask-repeat: repeat;
+}
+
+.dark .login-fondo::before {
+  opacity: 0.11;
+}
+
+.login-brillo {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(72px);
+  animation: login-flotar 18s ease-in-out infinite alternate;
+}
+
+@keyframes login-flotar {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(2.5rem, -2rem, 0) scale(1.1);
+  }
+  100% {
+    transform: translate3d(-2rem, 1.5rem, 0) scale(0.95);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-brillo {
+    animation: none;
+  }
+}
+
+/* Aureola de la foto de perfil (saludo de Inicio): un anillo con los colores
+   de la marca que gira lento y un brillo que late. Toma los colores del tema. */
+.aureola {
+  position: relative;
+  display: grid;
+  place-items: center;
+  border-radius: 9999px;
+  padding: 3px;
+  isolation: isolate;
+}
+
+.aureola::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  /* Naranja de la marca con un destello claro que da la vuelta. */
+  background: conic-gradient(
+    var(--brand-orange),
+    var(--brand-orange-glow),
+    rgb(255 255 255 / 0.9),
+    var(--brand-orange-glow),
+    var(--brand-orange)
+  );
+  animation: aureola-girar 5s linear infinite;
+}
+
+/* El brillo irradia hacia afuera del anillo: la foto tapa todo lo de adentro. */
+.aureola::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  border-radius: inherit;
+  box-shadow:
+    0 0 16px 4px var(--brand-orange),
+    0 0 36px 12px var(--brand-orange-glow);
+  animation: aureola-latir 3s ease-in-out infinite;
+}
+
+.aureola img {
+  box-shadow: 0 0 0 2px var(--brand-navy-deep);
+}
+
+@keyframes aureola-girar {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@keyframes aureola-latir {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(0.94);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aureola::before,
+  .aureola::after {
+    animation: none;
   }
 }

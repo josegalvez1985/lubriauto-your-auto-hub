@@ -12,10 +12,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card } from "@/components/ui/card";
 import { Droplet, Wrench, Gauge, ShieldCheck, Eye, EyeOff, Mail, Lock, Fingerprint } from "lucide-react";
 import { biometricEnabled, biometricVerify } from "@/lib/biometric";
-import { InstallPwaBanner } from "@/components/install-pwa-banner";
 import { useEffect } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { InstallPwaButton } from "@/components/install-pwa-button";
 
 const logoUrl = `${import.meta.env.BASE_URL}icon-512.png`;
 
@@ -131,9 +129,10 @@ function LoginPage() {
       </aside>
 
       {/* Form side */}
-      <main className="relative flex items-center justify-center px-5 py-10 sm:px-8">
+      <main className="relative flex items-center justify-center overflow-hidden px-5 py-10 sm:px-8">
+        <FondoLogin />
         <ThemeToggle className="absolute top-4 right-4 z-20 text-muted-foreground hover:text-foreground" />
-        <div className="w-full max-w-md">
+        <div className="relative z-10 w-full max-w-md">
           {/* Mobile logo */}
           <div className="lg:hidden flex flex-col items-center mb-8">
             <div className="h-36 w-36 shrink-0 rounded-3xl bg-white dark:bg-white/10 dark:backdrop-blur p-1 flex items-center justify-center ring-1 ring-[color-mix(in_oklab,var(--brand-navy)_12%,transparent)] dark:ring-white/15 shadow-[var(--shadow-card)]">
@@ -144,8 +143,8 @@ function LoginPage() {
             </p>
           </div>
 
-          <Card className="border-0 shadow-none lg:border lg:shadow-[var(--shadow-card)] p-0 lg:p-8 bg-transparent lg:bg-card">
-            <form className="space-y-5 lg:mt-0 mt-2" onSubmit={handleSubmit}>
+          <Card className="rounded-md border-border/60 bg-card/80 p-6 sm:p-8 shadow-[var(--shadow-card)] backdrop-blur-xl">
+            <form className="space-y-5" onSubmit={handleSubmit}>
               <div className="space-y-2">
                 <Label htmlFor="usuario">Correo electrónico</Label>
                 <div className="relative">
@@ -158,7 +157,7 @@ function LoginPage() {
                     value={usuario}
                     onChange={(e) => setUsuario(e.target.value)}
                     placeholder="tu@correo.com"
-                    className="pl-10 h-12 rounded-xl"
+                    className="pl-10 h-12 rounded-[6px]"
                   />
                 </div>
               </div>
@@ -185,7 +184,7 @@ function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="pl-10 pr-10 h-12 rounded-xl"
+                    className="pl-10 pr-10 h-12 rounded-[6px]"
                   />
                   <button
                     type="button"
@@ -208,7 +207,7 @@ function LoginPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-12 rounded-xl text-base font-semibold text-white border-0 hover:opacity-95 transition disabled:opacity-60"
+                className="w-full h-12 rounded-[6px] text-base font-semibold text-white border-0 hover:opacity-95 transition disabled:opacity-60"
                 style={{ background: "var(--gradient-accent)", boxShadow: "var(--shadow-accent)" }}
               >
                 {loading ? "Ingresando…" : "Iniciar sesión"}
@@ -219,14 +218,12 @@ function LoginPage() {
                   type="button"
                   variant="outline"
                   onClick={handleBiometric}
-                  className="w-full h-12 rounded-xl text-base font-semibold"
+                  className="w-full h-12 rounded-[6px] text-base font-semibold"
                 >
                   <Fingerprint className="h-5 w-5 mr-2" />
                   Entrar con biometría
                 </Button>
               )}
-
-              <InstallPwaButton className="w-full h-11 rounded-xl" />
             </form>
 
             <p className="mt-8 text-center text-sm text-muted-foreground">
@@ -240,7 +237,18 @@ function LoginPage() {
       </main>
 
       <ResetPasswordDialog open={resetOpen} onOpenChange={setResetOpen} />
-      <InstallPwaBanner />
+    </div>
+  );
+}
+
+// Fondo de taller: patrón de herramientas con dos brillos de marca que se mueven lento.
+function FondoLogin() {
+  return (
+    <div aria-hidden className="login-fondo">
+      <span className="login-brillo -top-32 -right-24 h-[28rem] w-[28rem] opacity-25"
+            style={{ background: "var(--brand-orange)" }} />
+      <span className="login-brillo -bottom-40 -left-32 h-[30rem] w-[30rem] opacity-20"
+            style={{ background: "var(--brand-navy)", animationDelay: "-9s" }} />
     </div>
   );
 }

@@ -72,7 +72,7 @@ export function AutoFormDialog({
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
               placeholder="Toyota Corolla 2018"
-              className="h-12 rounded-xl"
+              className="h-12 rounded-[6px]"
             />
           </div>
           <div className="space-y-2">
@@ -82,7 +82,7 @@ export function AutoFormDialog({
               value={placa}
               onChange={(e) => setPlaca(e.target.value)}
               placeholder="ABC123"
-              className="h-12 rounded-xl"
+              className="h-12 rounded-[6px]"
             />
           </div>
           <div className="space-y-2">
@@ -95,13 +95,13 @@ export function AutoFormDialog({
               value={km}
               onChange={(e) => setKm(formatMiles(e.target.value))}
               placeholder="85.000"
-              className="h-12 rounded-xl"
+              className="h-12 rounded-[6px]"
             />
           </div>
           <Button
             type="submit"
             disabled={loading}
-            className="w-full h-12 rounded-xl text-white border-0 disabled:opacity-60"
+            className="w-full h-12 rounded-[6px] text-white border-0 disabled:opacity-60"
             style={{ background: "var(--gradient-accent)" }}
           >
             {loading ? "Guardando…" : editando ? "Guardar cambios" : "Crear vehículo"}
