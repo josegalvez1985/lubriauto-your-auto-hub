@@ -213,6 +213,8 @@ Se cierra la sesión **en todos tus dispositivos** y ya no puedes entrar con ese
 
 Tu ayudante dentro de la app: el botón redondo naranja ✨ de abajo a la derecha, en cualquier pantalla con sesión.
 
+¿Te tapa algo? **Mantenlo apretado y arrástralo**: se pega al costado más cercano y se queda donde lo dejaste, también la próxima vez que abras la app.
+
 **Puedes preguntarle:**
 - 💬 *"¿Cuándo fue mi último cambio de aceite?"*
 - 💬 *"¿Cuánto gasté en el Corolla este año?"*

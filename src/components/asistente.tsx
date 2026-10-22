@@ -85,28 +85,7 @@ function Asistente({ token, pathname }: { token: string; pathname: string }) {
   return (
     <>
       {!(escritorio && abierto) && (
-        <button
-          type="button"
-          onClick={() => {
-            void cargarManual(); // que esté listo para la primera pregunta
-            abrirAsistente(true);
-          }}
-          aria-label="Abrir el asistente"
-          title="Asistente"
-          className={cn(
-            "fixed right-4 z-40 grid size-14 place-items-center rounded-full text-white transition active:scale-95 lg:right-6 lg:bottom-6",
-            conBarra ? "bottom-[calc(5.75rem+env(safe-area-inset-bottom))]" : "bottom-4",
-          )}
-          style={{ background: "var(--gradient-accent)", boxShadow: "var(--shadow-accent)" }}
-        >
-          <Sparkles className="size-6" />
-          {pendiente && (
-            <span className="absolute top-0.5 right-0.5 flex size-3.5">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-white/70" />
-              <span className="relative inline-flex size-3.5 rounded-full border-2 border-white bg-destructive" />
-            </span>
-          )}
-        </button>
+        <BotonFlotante conBarra={conBarra} escritorio={escritorio} pendiente={pendiente} />
       )}
 
       {escritorio ? (
@@ -130,6 +109,163 @@ function Asistente({ token, pathname }: { token: string; pathname: string }) {
         </Drawer>
       )}
     </>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* El botón flotante: se puede arrastrar                                       */
+/* -------------------------------------------------------------------------- */
+
+/** Dónde lo dejó el usuario: pegado a un costado, a cierta altura del borde de abajo. */
+type Posicion = { lado: "izq" | "der"; abajo: number };
+
+const CLAVE_POSICION = "asistente-boton";
+const TAMANO = 56; // size-14
+const MARGEN = 16;
+// Más de esto es arrastrar; menos, un toque que abre el chat.
+const UMBRAL = 6;
+// En Inicio, en el celular, la barra fija de abajo.
+const ALTO_BARRA = 92;
+
+function leerPosicion(): Posicion | null {
+  try {
+    const p = JSON.parse(localStorage.getItem(CLAVE_POSICION) ?? "null") as Posicion | null;
+    return p && (p.lado === "izq" || p.lado === "der") && typeof p.abajo === "number" ? p : null;
+  } catch {
+    return null;
+  }
+}
+
+function guardarPosicion(p: Posicion) {
+  try {
+    localStorage.setItem(CLAVE_POSICION, JSON.stringify(p));
+  } catch {
+    // sin almacenamiento: vale para esta visita
+  }
+}
+
+function BotonFlotante({
+  conBarra,
+  escritorio,
+  pendiente,
+}: {
+  conBarra: boolean;
+  escritorio: boolean;
+  pendiente: boolean;
+}) {
+  const [posicion, setPosicion] = useState<Posicion | null>(null);
+  // Mientras se arrastra: la esquina de arriba a la izquierda, en px.
+  const [arrastre, setArrastre] = useState<{ x: number; y: number } | null>(null);
+  const inicio = useRef<{ px: number; py: number; x: number; y: number; movido: boolean } | null>(
+    null,
+  );
+  // Un arrastre termina con un click del navegador: ese no abre el chat.
+  const ignorarClick = useRef(false);
+
+  useEffect(() => {
+    setPosicion(leerPosicion());
+  }, []);
+
+  const minAbajo = conBarra && !escritorio ? ALTO_BARRA : MARGEN;
+  const limitarY = (y: number) =>
+    Math.min(Math.max(y, MARGEN), window.innerHeight - TAMANO - minAbajo);
+
+  const abrir = () => {
+    void cargarManual(); // que esté listo para la primera pregunta
+    abrirAsistente(true);
+  };
+
+  const estilo: React.CSSProperties = {
+    background: "var(--gradient-accent)",
+    boxShadow: "var(--shadow-accent)",
+  };
+  if (arrastre) {
+    Object.assign(estilo, { left: arrastre.x, top: arrastre.y, right: "auto", bottom: "auto" });
+  } else if (posicion) {
+    // Si la ventana se achicó, que no quede afuera.
+    const abajo = Math.min(
+      Math.max(posicion.abajo, minAbajo),
+      window.innerHeight - TAMANO - MARGEN,
+    );
+    Object.assign(estilo, {
+      left: posicion.lado === "izq" ? MARGEN : "auto",
+      right: posicion.lado === "der" ? MARGEN : "auto",
+      bottom: abajo,
+    });
+  }
+
+  return (
+    <button
+      type="button"
+      onPointerDown={(e) => {
+        if (e.button !== 0) return;
+        // En el celular, tras arrastrar a veces no llega el click: que no se trague este toque.
+        ignorarClick.current = false;
+        const r = e.currentTarget.getBoundingClientRect();
+        inicio.current = { px: e.clientX, py: e.clientY, x: r.left, y: r.top, movido: false };
+        e.currentTarget.setPointerCapture(e.pointerId);
+      }}
+      onPointerMove={(e) => {
+        const i = inicio.current;
+        if (!i) return;
+        const dx = e.clientX - i.px;
+        const dy = e.clientY - i.py;
+        if (!i.movido && Math.hypot(dx, dy) < UMBRAL) return;
+        i.movido = true;
+        setArrastre({
+          x: Math.min(Math.max(i.x + dx, MARGEN), window.innerWidth - TAMANO - MARGEN),
+          y: limitarY(i.y + dy),
+        });
+      }}
+      onPointerUp={() => {
+        const i = inicio.current;
+        inicio.current = null;
+        if (!i?.movido || !arrastre) return;
+        // Se pega al costado más cercano y queda a la altura donde lo soltó.
+        const nueva: Posicion = {
+          lado: arrastre.x + TAMANO / 2 < window.innerWidth / 2 ? "izq" : "der",
+          abajo: window.innerHeight - arrastre.y - TAMANO,
+        };
+        setPosicion(nueva);
+        guardarPosicion(nueva);
+        setArrastre(null);
+        ignorarClick.current = true;
+      }}
+      onPointerCancel={() => {
+        inicio.current = null;
+        setArrastre(null);
+      }}
+      onClick={() => {
+        if (ignorarClick.current) {
+          ignorarClick.current = false;
+          return;
+        }
+        abrir();
+      }}
+      aria-label="Abrir el asistente (se puede arrastrar)"
+      title="Asistente: tócalo para abrirlo o arrástralo para moverlo"
+      className={cn(
+        "fixed z-40 grid size-14 touch-none select-none place-items-center rounded-full text-white",
+        arrastre
+          ? "scale-110 cursor-grabbing"
+          : "cursor-grab transition-[left,right,bottom,transform] duration-200 active:scale-95",
+        !posicion &&
+          !arrastre &&
+          cn(
+            "right-4 lg:right-6 lg:bottom-6",
+            conBarra ? "bottom-[calc(5.75rem+env(safe-area-inset-bottom))]" : "bottom-4",
+          ),
+      )}
+      style={estilo}
+    >
+      <Sparkles className="size-6" />
+      {pendiente && (
+        <span className="absolute top-0.5 right-0.5 flex size-3.5">
+          <span className="absolute inline-flex size-full animate-ping rounded-full bg-white/70" />
+          <span className="relative inline-flex size-3.5 rounded-full border-2 border-white bg-destructive" />
+        </span>
+      )}
+    </button>
   );
 }
 
