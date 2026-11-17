@@ -125,15 +125,18 @@ Todos tus autos, con su placa, kilometraje y estado (**Activo** o **Inactivo**).
    - **Kilometraje**: solo números; los puntos de miles se ponen solos.
 3. Toca **Crear vehículo**.
 
-### Editar o inactivar
+### Editar, inactivar o activar
 
 | Ícono | Acción |
 | :-: | --- |
 | ✏️ | **Editar**: cambia los datos o actualiza el kilometraje |
-| 🗑️ | **Inactivar**: pide confirmación |
+| 🗑️ | **Inactivar** (en los activos): pide confirmación |
+| ↺ | **Activar** (en los inactivos): vuelve a aparecer en Inicio y en el Historial |
 
 > [!NOTE]
-> Inactivar **no borra** el vehículo ni sus servicios: solo deja de aparecer en Inicio y en el Historial.
+> Inactivar **no borra** el vehículo ni sus servicios: solo deja de aparecer en Inicio y en el Historial, hasta que lo actives de nuevo.
+
+Solo ves, editas, activas e inactivas **tus** vehículos: los de otros usuarios no aparecen.
 
 ---
 
@@ -241,7 +244,7 @@ La app lo calcula a partir del último servicio cuya descripción incluye la pal
 <details>
 <summary><b>No veo uno de mis vehículos en Inicio ni en el Historial</b></summary>
 
-Seguramente está **inactivo**. En **Vehículos** figura con la etiqueta *Inactivo*.
+Seguramente está **inactivo**. En **Vehículos** figura con la etiqueta *Inactivo*: toca ↺ para activarlo.
 </details>
 
 <details>

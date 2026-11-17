@@ -75,5 +75,7 @@ export const autosApi = {
   crear: (token: string, auto: AutoInput) => request(token, "crear", "POST", auto),
   actualizar: (token: string, id: number, auto: AutoInput) =>
     request(token, String(id), "PUT", auto),
+  /** Inactiva (no borra): el auto deja de aparecer en Inicio y en Historial. */
   eliminar: (token: string, id: number) => request(token, String(id), "DELETE"),
+  activar: (token: string, id: number) => request(token, `${id}/activar`, "POST"),
 };

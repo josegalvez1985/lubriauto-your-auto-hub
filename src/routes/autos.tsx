@@ -7,7 +7,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ArrowLeft, Car, Plus, Pencil, Trash2, Gauge } from "lucide-react";
+import { ArrowLeft, Car, Plus, Pencil, Trash2, Gauge, RotateCcw } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { autosApi, type Auto } from "@/lib/autos-api";
 import { mensajeLimpio } from "@/lib/auth-api";
@@ -72,6 +72,16 @@ function AutosPage() {
     if (r.ok) {
       toast.success("Vehículo inactivado");
       setToDelete(null);
+      cargar();
+    } else {
+      toast.error(mensajeLimpio(r.error));
+    }
+  };
+
+  const handleActivar = async (a: Auto) => {
+    const r = await autosApi.activar(token, a.id_auto);
+    if (r.ok) {
+      toast.success("Vehículo activado");
       cargar();
     } else {
       toast.error(mensajeLimpio(r.error));
@@ -164,10 +174,17 @@ function AutosPage() {
                     <Button size="icon" variant="ghost" className="rounded-[6px]" onClick={() => handleEditar(a)}>
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button size="icon" variant="ghost" className="rounded-[6px] text-destructive hover:text-destructive"
-                            onClick={() => setToDelete(a)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    {a.estado === "N" ? (
+                      <Button size="icon" variant="ghost" className="rounded-[6px] text-emerald-600 hover:text-emerald-600"
+                              aria-label="Activar" title="Activar" onClick={() => handleActivar(a)}>
+                        <RotateCcw className="h-4 w-4" />
+                      </Button>
+                    ) : (
+                      <Button size="icon" variant="ghost" className="rounded-[6px] text-destructive hover:text-destructive"
+                              aria-label="Inactivar" title="Inactivar" onClick={() => setToDelete(a)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 </Card>
               </li>

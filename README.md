@@ -122,7 +122,7 @@ Todos responden `{ ok: true, … }` o `{ ok: false, error }`. Los que llevan ses
 | --- | :-: | --- |
 | `POST autenticacion/login` · `registro` · `reset` | | Entrar, crear cuenta, contraseña temporal por correo |
 | `PUT autenticacion/password` | | Cambiar contraseña (con la actual) |
-| `GET autos/lista` · `GET/PUT/DELETE autos/:id` · `POST autos/crear` | ✓ | Vehículos |
+| `GET autos/lista` · `GET/PUT/DELETE autos/:id` · `POST autos/crear` · `POST autos/:id/activar` | ✓ | Vehículos (`DELETE` inactiva, no borra) |
 | `GET servicios/auto/:id_auto` · `GET/PUT/DELETE servicios/:id` · `POST servicios/crear` | ✓ | Servicios |
 | `POST cuenta/inactivar` | ✓ | Dar de baja la cuenta (con la contraseña) |
 | `POST cuenta/estado` · `reactivar` · `reactivar-correo` | | ¿Correo dado de baja? y reactivarlo |
@@ -137,6 +137,7 @@ Se corren en **SQL Workshop → SQL Scripts** (Upload → Run). Todos se pueden 
 | 1 | [`asistente-tablas.sql`](backend/asistente-tablas.sql) | `LT_IA_CONFIG`, `LT_IA_CONSULTAS` y la configuración de entrada |
 | 2 | [`asistente.sql`](backend/asistente.sql) | `PKG_IA_LT`, `V_LT_IA_MIS_AUTOS`, `V_LT_IA_MIS_SERVICIOS` y `POST asistente/preguntar`. Al final prueba la conexión con la API de Claude |
 | — | [`cuenta.sql`](backend/cuenta.sql) | `LT_CUENTAS_BAJAS`, `PKG_LT_CUENTA` y los endpoints `cuenta/*` |
+| — | [`autos-usuario.sql`](backend/autos-usuario.sql) | Redefine `GET autos/lista` (solo los autos del usuario) y crea `POST autos/:id/activar`. Revisa que los demás handlers de `autos/*` y `servicios/*` comparen el `USUARIO` |
 
 El asistente usa la **clave de la API del ERP** (`LUBRIMEC_IA_CONFIG.API_KEY`): no hay que cargar nada. Sus límites se cambian sin reejecutar nada:
 
@@ -155,7 +156,7 @@ UPDATE LT_USUARIOS SET ESTADO = 'A', FECHA_MODIF = SYSTIMESTAMP WHERE USERNAME =
 
 ## Pendientes conocidos
 
-- **`GET autos/lista` devuelve los autos de todos los usuarios**: en su handler el filtro está comentado (`--WHERE USUARIO = l_user AND ACTIVO = 'S'`). Hay que restaurar el filtro por usuario. Conviene revisar también que `autos/:id` y `servicios/*` validen que el auto sea del usuario del token.
+- **`GET autos/lista` devolvía los autos de todos los usuarios** (el filtro estaba comentado: `--WHERE USUARIO = l_user AND ACTIVO = 'S'`). Lo corrige [`backend/autos-usuario.sql`](backend/autos-usuario.sql), que filtra por `USUARIO` pero no por `ACTIVO`, porque "Mis vehículos" muestra los inactivos. Su verificación marca como `[REVISAR]` los handlers de `autos/*` y `servicios/*` que no comparan el `USUARIO`.
 - **El asistente del ERP puede ver `LT_IA_CONSULTAS`** (las preguntas de los usuarios de LubriAuto) si `PKG_IA_LUBRIMEC` ve todo el esquema: sumar `LT_IA_%` a sus tablas privadas.
 - **Sin implementar**: Avisos (la campana), Notificaciones y Datos personales. El manual los nombra como "todavía no disponible".
 - **La foto de perfil es local**: para que acompañe al usuario en todos sus dispositivos habría que guardarla en Oracle.
